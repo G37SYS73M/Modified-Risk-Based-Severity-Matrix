@@ -44,29 +44,41 @@ This reflects the **level of effort, tooling, and skill** required to achieve th
 
 ---
 
-### Risk Scoring Matrix
-
-#### Qualitative Matrix
-
-| Detectability \\ Impact | Critical | High | Medium | Low |
-| ---------------------- | -------- | ---- | ------ | --- |
-| **Undetected**         | Critical | Critical | High | Medium |
-| **Partially Detected** | Critical | High     | Medium | Low |
-| **Detected**           | High     | Medium   | Low    | Low |
-
-This matrix is used to guide risk classification for Red Team findings, helping prioritize responses based on real operational scenarios, not just theoretical vulnerability scores.
-
----
-## 🎯 Severity Scoring Logic
+### Scoring Methodology
 
 Each finding is assigned a **composite severity score** by evaluating the **combined effect of impact, detectability, and ease of exploitation**. This produces a score on a **scale from 0.0 to 10.0**, enabling prioritization similar to other frameworks, but grounded in the reality of adversarial simulation.
 
-| Example Scenario | Impact  | Detection          | Ease     | Score |
-|------------------|---------|--------------------|----------|-------|
-| Domain Admin via Kerberoasting (undetected) | Critical | Undetected | Moderate | 9.5   |
-| Phishing leading to workstation access (detected) | Medium   | Detected   | Easy     | 5.0   |
-| Privilege escalation on DMZ host (no response) | High     | Partially Detected | Moderate | 7.0   |
-| Misconfigured login portal with password spray | Low      | Detected   | Easy     | 2.5   |
+#### Step-by-Step Scoring Logic
+
+1. **Assign Base Risk Score** from the qualitative matrix:
+
+| Detectability \\ Impact | Critical | High | Medium | Low |
+|------------------------|----------|------|--------|-----|
+| **Undetected**         | 9.0      | 8.5  | 7.0    | 6.0 |
+| **Partially Detected** | 8.5      | 7.5  | 6.0    | 4.0 |
+| **Detected**           | 7.5      | 6.0  | 3.5    | 2.5 |
+
+2. **Apply Ease of Exploitation Modifier**:
+
+| Ease Level   | Modifier |
+|--------------|----------|
+| **Easy**     | -0.5     |
+| **Moderate** | ±0.0     |
+| **Hard**     | +0.5     |
+
+Final Score = Base Score + Modifier
+
+#### Example Scenarios
+
+| Scenario                          | Impact   | Detection          | Ease     | Final Score |
+|----------------------------------|----------|--------------------|----------|-------------|
+| Domain Admin via Kerberoasting   | Critical | Undetected         | Moderate | 9.5         |
+| Phishing to Workstation Access   | Medium   | Detected           | Easy     | 5.0         |
+| PrivEsc on DMZ Host              | High     | Partially Detected | Moderate | 7.0         |
+| Password Spray on Login Portal   | Low      | Detected           | Easy     | 2.5         |
+
+This methodology enables balanced and realistic risk classification, grounded in attacker TTPs and operational impact.
+
 
 ---
 
