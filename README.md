@@ -62,9 +62,9 @@ Each finding is assigned a **composite severity score** by evaluating the **comb
 
 | Ease Level   | Modifier |
 |--------------|----------|
-| **Easy**     | -0.5     |
+| **Easy**     | +0.5     |
 | **Moderate** | ±0.0     |
-| **Hard**     | +0.5     |
+| **Hard**     | -0.5     |
 
 Final Score = Base Score + Modifier
 
