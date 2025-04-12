@@ -2,53 +2,71 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Severity Score Calculator</title>
+  <title>Modified Risk-Based Severity Calculator</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
+      margin: 40px;
+      background-color: #f4f4f4;
     }
-    label, select, button {
+    h1 {
+      text-align: center;
+    }
+    .calculator {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    label {
       display: block;
-      margin: 10px 0;
+      margin-top: 15px;
+    }
+    select, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
     }
     #result {
       margin-top: 20px;
       font-size: 1.2em;
+      text-align: center;
       font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <h1>Composite Severity Score Calculator</h1>
+  <h1>Modified Risk-Based Severity Calculator</h1>
+  <div class="calculator">
+    <label for="impact">Impact:</label>
+    <select id="impact">
+      <option value="Critical">Critical</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
 
-  <label for="detectability">Detectability:</label>
-  <select id="detectability">
-    <option value="Undetected">Undetected</option>
-    <option value="Partially Detected">Partially Detected</option>
-    <option value="Detected">Detected</option>
-  </select>
+    <label for="detectability">Detectability:</label>
+    <select id="detectability">
+      <option value="Undetected">Undetected</option>
+      <option value="Partially Detected">Partially Detected</option>
+      <option value="Detected">Detected</option>
+    </select>
 
-  <label for="impact">Impact:</label>
-  <select id="impact">
-    <option value="Critical">Critical</option>
-    <option value="High">High</option>
-    <option value="Medium">Medium</option>
-    <option value="Low">Low</option>
-  </select>
+    <label for="ease">Ease of Exploitation:</label>
+    <select id="ease">
+      <option value="Easy">Easy</option>
+      <option value="Moderate">Moderate</option>
+      <option value="Hard">Hard</option>
+    </select>
 
-  <label for="ease">Ease of Exploitation:</label>
-  <select id="ease">
-    <option value="Easy">Easy</option>
-    <option value="Moderate">Moderate</option>
-    <option value="Hard">Hard</option>
-  </select>
-
-  <button onclick="calculateScore()">Calculate Score</button>
-  <div id="result"></div>
+    <button onclick="calculateSeverity()">Calculate Severity Score</button>
+    <div id="result"></div>
+  </div>
 
   <script>
     const baseRiskMatrix = {
@@ -63,9 +81,9 @@
       'Hard': -0.5
     };
 
-    function calculateScore() {
-      const detectability = document.getElementById('detectability').value;
+    function calculateSeverity() {
       const impact = document.getElementById('impact').value;
+      const detectability = document.getElementById('detectability').value;
       const ease = document.getElementById('ease').value;
 
       const baseScore = baseRiskMatrix[detectability][impact];
