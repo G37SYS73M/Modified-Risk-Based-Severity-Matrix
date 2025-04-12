@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Severity Score Calculator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+    label, select, button {
+      display: block;
+      margin: 10px 0;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Composite Severity Score Calculator</h1>
+
+  <label for="detectability">Detectability:</label>
+  <select id="detectability">
+    <option value="Undetected">Undetected</option>
+    <option value="Partially Detected">Partially Detected</option>
+    <option value="Detected">Detected</option>
+  </select>
+
+  <label for="impact">Impact:</label>
+  <select id="impact">
+    <option value="Critical">Critical</option>
+    <option value="High">High</option>
+    <option value="Medium">Medium</option>
+    <option value="Low">Low</option>
+  </select>
+
+  <label for="ease">Ease of Exploitation:</label>
+  <select id="ease">
+    <option value="Easy">Easy</option>
+    <option value="Moderate">Moderate</option>
+    <option value="Hard">Hard</option>
+  </select>
+
+  <button onclick="calculateScore()">Calculate Score</button>
+  <div id="result"></div>
+
+  <script>
+    const baseRiskMatrix = {
+      'Undetected': { 'Critical': 9.0, 'High': 8.5, 'Medium': 7.0, 'Low': 6.0 },
+      'Partially Detected': { 'Critical': 8.5, 'High': 7.5, 'Medium': 6.0, 'Low': 4.0 },
+      'Detected': { 'Critical': 7.5, 'High': 6.0, 'Medium': 3.5, 'Low': 2.5 }
+    };
+
+    const easeModifiers = {
+      'Easy': 0.5,
+      'Moderate': 0.0,
+      'Hard': -0.5
+    };
+
+    function calculateScore() {
+      const detectability = document.getElementById('detectability').value;
+      const impact = document.getElementById('impact').value;
+      const ease = document.getElementById('ease').value;
+
+      const baseScore = baseRiskMatrix[detectability][impact];
+      const modifier = easeModifiers[ease];
+      const finalScore = (baseScore + modifier).toFixed(1);
+
+      document.getElementById('result').innerText = `Final Severity Score: ${finalScore}`;
+    }
+  </script>
+</body>
+</html>
