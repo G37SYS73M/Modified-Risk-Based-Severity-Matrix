@@ -5,6 +5,8 @@ To appropriately assess the severity of findings discovered during the Red Team 
 
 This scoring system provides a more accurate representation of the **operational risk** posed by Red Team activities, enabling stakeholders to prioritize remediation efforts based on **real-world attack scenarios**.
 
+Try now: https://riskcalculator.adversarialops.com/
+
 ---
 
 ## 📊 Scoring Dimensions
