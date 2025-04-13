@@ -1,7 +1,7 @@
 
 # Modified Risk-Based Severity Matrix for Red Team Engagements
 
-To appropriately assess the severity of findings discovered during the Red Team engagement, we utilized a **Modified Risk-Based Matrix** tailored specifically for offensive security operations. Unlike traditional vulnerability scoring systems (e.g., CVSS), this model incorporates not just the technical impact of a vulnerability or action, but also its **business relevance**, **real-world exploitability**, and **detectability** by defensive mechanisms.
+To assess the severity of findings discovered during the Red Team engagement appropriately, we can utilise a **Modified Risk-Based Matrix** tailored specifically for offensive security operations. Unlike traditional vulnerability scoring systems (e.g., CVSS), this model incorporates not just the technical impact of a vulnerability or action, but also its **business relevance**, **real-world exploitability**, and **detectability** by defensive mechanisms.
 
 This scoring system provides a more accurate representation of the **operational risk** posed by Red Team activities, enabling stakeholders to prioritize remediation efforts based on **real-world attack scenarios**.
 
@@ -26,7 +26,7 @@ This metric represents the potential **business and technical consequence** of t
 
 ### 2. Detectability
 
-This dimension captures how effectively the activity was observed or responded to by the organization’s **defensive capabilities** (e.g., SOC, EDR, SIEM).
+This dimension captures how effectively the organization’s **defensive capabilities** (e.g., SOC, EDR, SIEM) observed or responded to the activity.
 
 | Detection Level | Description |
 |------------------|-------------|
