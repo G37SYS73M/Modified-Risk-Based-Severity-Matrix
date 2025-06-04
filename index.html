@@ -1,97 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Modified Risk-Based Severity Calculator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modified Risk Based Severity Calculator</title>
   <style>
+    /* Basic reset & font */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       font-family: Arial, sans-serif;
-      margin: 40px;
-      background-color: #f4f4f4;
+      background-color: #f7f7f7;
+      color: #333;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 400px;
+      margin: 40px auto;
+      padding: 20px 24px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
     h1 {
       text-align: center;
+      margin-bottom: 24px;
+      font-size: 1.6rem;
+      color: #222;
     }
-    .calculator {
-      background: #fff;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 500px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+
+    /* Form layout */
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    .form-row {
+      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
     }
     label {
-      display: block;
-      margin-top: 15px;
-    }
-    select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 1.2em;
-      text-align: center;
+      margin-bottom: 6px;
       font-weight: bold;
+    }
+    select {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    /* Button & output */
+    .result {
+      margin-top: 24px;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #1e90ff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0d74d1;
+    }
+    .output-box {
+      margin-top: 16px;
+      padding: 12px;
+      min-height: 48px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background-color: #fafafa;
+      font-size: 1.1rem;
     }
   </style>
 </head>
 <body>
-  <h1>Modified Risk-Based Severity Calculator</h1>
-  <div class="calculator">
-    <label for="impact">Impact:</label>
-    <select id="impact">
-      <option value="Critical">Critical</option>
-      <option value="High">High</option>
-      <option value="Medium">Medium</option>
-      <option value="Low">Low</option>
-    </select>
+  <div class="container">
+    <h1>Risk Rating Calculator</h1>
 
-    <label for="detectability">Detectability:</label>
-    <select id="detectability">
-      <option value="Undetected">Undetected</option>
-      <option value="Partially Detected">Partially Detected</option>
-      <option value="Detected">Detected</option>
-    </select>
+    <form id="risk-form">
+      <div class="form-row">
+        <label for="impact">Impact:</label>
+        <select id="impact" name="impact">
+          <option value="1">1 – Negligible</option>
+          <option value="2">2 – Minor</option>
+          <option value="3">3 – Moderate</option>
+          <option value="4">4 – Major</option>
+          <option value="5">5 – Critical</option>
+        </select>
+      </div>
 
-    <label for="ease">Ease of Exploitation:</label>
-    <select id="ease">
-      <option value="Easy">Easy</option>
-      <option value="Moderate">Moderate</option>
-      <option value="Hard">Hard</option>
-    </select>
+      <div class="form-row">
+        <label for="likelihood">Likelihood:</label>
+        <select id="likelihood" name="likelihood">
+          <option value="1">1 – Rare</option>
+          <option value="2">2 – Unlikely</option>
+          <option value="3">3 – Possible</option>
+          <option value="4">4 – Likely</option>
+          <option value="5">5 – Certain</option>
+        </select>
+      </div>
 
-    <button onclick="calculateSeverity()">Calculate Severity Score</button>
-    <div id="result"></div>
+      <div class="form-row">
+        <label for="detectability">Detectability:</label>
+        <select id="detectability" name="detectability">
+          <option value="1">1 – Very High Detectability</option>
+          <option value="2">2 – High Detectability</option>
+          <option value="3">3 – Moderate Detectability</option>
+          <option value="4">4 – Low Detectability</option>
+          <option value="5">5 – Very Low Detectability</option>
+        </select>
+      </div>
+
+      <div class="result">
+        <button type="button" id="calculate-btn">Calculate Risk</button>
+        <div id="output" class="output-box">
+          <!-- Numeric score + tier will appear here -->
+        </div>
+      </div>
+    </form>
   </div>
 
   <script>
-    const baseRiskMatrix = {
-      'Undetected': { 'Critical': 9.0, 'High': 8.5, 'Medium': 7.0, 'Low': 6.0 },
-      'Partially Detected': { 'Critical': 8.5, 'High': 7.5, 'Medium': 6.0, 'Low': 4.0 },
-      'Detected': { 'Critical': 7.5, 'High': 6.0, 'Medium': 3.5, 'Low': 2.5 }
-    };
+    // Wait until DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function () {
+      const impactSelect = document.getElementById('impact');
+      const likelihoodSelect = document.getElementById('likelihood');
+      const detectabilitySelect = document.getElementById('detectability');
+      const calculateBtn = document.getElementById('calculate-btn');
+      const outputDiv = document.getElementById('output');
 
-    const easeModifiers = {
-      'Easy': 0.5,
-      'Moderate': 0.0,
-      'Hard': -0.5
-    };
+      // Map the numeric score to a qualitative tier
+      function getSeverityTier(score) {
+        if (score >= 75) {
+          return 'Critical';
+        } else if (score >= 50) {
+          return 'High';
+        } else if (score >= 20) {
+          return 'Medium';
+        } else {
+          return 'Low';
+        }
+      }
 
-    function calculateSeverity() {
-      const impact = document.getElementById('impact').value;
-      const detectability = document.getElementById('detectability').value;
-      const ease = document.getElementById('ease').value;
+      // When user clicks “Calculate Risk”
+      calculateBtn.addEventListener('click', function () {
+        // Parse selected values as integers
+        const impact = parseInt(impactSelect.value, 10);
+        const likelihood = parseInt(likelihoodSelect.value, 10);
+        const detectability = parseInt(detectabilitySelect.value, 10);
 
-      const baseScore = baseRiskMatrix[detectability][impact];
-      const modifier = easeModifiers[ease];
-      const finalScore = (baseScore + modifier).toFixed(1);
+        // Calculate composite score
+        const score = impact * likelihood * detectability;
 
-      document.getElementById('result').innerText = `Final Severity Score: ${finalScore}`;
-    }
+        // Determine severity tier
+        const tier = getSeverityTier(score);
+
+        // Display result
+        outputDiv.innerHTML = `
+          <strong>Risk Score:</strong> ${score} <br/>
+          <strong>Severity Tier:</strong> ${tier}
+        `;
+      });
+    });
   </script>
 </body>
 </html>
