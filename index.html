@@ -18,7 +18,7 @@
       line-height: 1.5;
     }
     .container {
-      max-width: 500px;
+      max-width: 600px;
       margin: 40px auto;
       padding: 24px;
       background-color: #fff;
@@ -44,7 +44,9 @@
       font-weight: bold;
       font-size: 1rem;
     }
-    select, input[type="number"] {
+    input[type="text"],
+    select,
+    input[type="number"] {
       width: 100%;
       padding: 8px 10px;
       border: 1px solid #bbb;
@@ -56,6 +58,7 @@
       font-size: 0.9rem;
       color: #555;
       margin-top: 4px;
+      line-height: 1.4;
     }
     .section-title {
       font-size: 1.2rem;
@@ -84,13 +87,13 @@
     .output-box {
       margin-top: 16px;
       padding: 14px;
-      min-height: 60px;
       border: 2px solid #ddd;
       border-radius: 4px;
       background-color: #fafafa;
       font-size: 1rem;
       text-align: left;
       white-space: pre-wrap;
+      overflow-wrap: break-word;
       transition: background-color 0.3s, border-color 0.3s;
     }
     .tier-label {
@@ -152,7 +155,7 @@
     <h1>Risk-Based Severity Calculator</h1>
 
     <!-- Settings: custom thresholds -->
-    <div class="section-title">Settings</div>
+    <div class="section-title">Settings (Custom Thresholds)</div>
     <form id="settings-form">
       <div class="form-row">
         <label for="threshold-medium">Medium Threshold (min score)</label>
@@ -171,6 +174,15 @@
     <!-- Calculator -->
     <div class="section-title">Calculate Risk</div>
     <form id="risk-form">
+      <!-- Finding Name -->
+      <div class="form-row">
+        <label for="finding-name">Finding Name</label>
+        <input type="text" id="finding-name" placeholder="Enter finding name or description" />
+        <div class="info">
+          Give a short title or identifier for this specific finding.
+        </div>
+      </div>
+
       <!-- Impact -->
       <div class="form-row">
         <label for="impact">Impact</label>
@@ -181,7 +193,14 @@
           <option value="4">4 – Major</option>
           <option value="5">5 – Critical</option>
         </select>
-        <div class="info">Potential damage if exploited.</div>
+        <div class="info">
+          <strong>Impact measures potential damage:</strong><br>
+          • 1 (Negligible): No significant harm or business effect<br>
+          • 2 (Minor): Limited, localized impact<br>
+          • 3 (Moderate): Noticeable (subset data exposed)<br>
+          • 4 (Major): Serious (major breach or downtime)<br>
+          • 5 (Critical): Catastrophic (systemic failure, regulatory)
+        </div>
       </div>
 
       <!-- Likelihood -->
@@ -194,23 +213,37 @@
           <option value="4">4 – Likely</option>
           <option value="5">5 – Certain</option>
         </select>
-        <div class="info">Probability the issue can be exploited.</div>
+        <div class="info">
+          <strong>Likelihood gauges probability of exploit:</strong><br>
+          • 1 (Rare): Extremely unlikely or requires advanced skills<br>
+          • 2 (Unlikely): Possible but not expected under normal threat conditions<br>
+          • 3 (Possible): Feasible with moderate effort/preconditions<br>
+          • 4 (Likely): Straightforward for skilled attackers, seen in wild<br>
+          • 5 (Certain): Trivial/exploited in the wild right now
+        </div>
       </div>
 
       <!-- Detectability -->
       <div class="form-row">
         <label for="detectability">Detectability</label>
         <select id="detectability" name="detectability">
-          <option value="1">1 – Very High Detectability</option>
-          <option value="2">2 – High Detectability</option>
-          <option value="3">3 – Moderate Detectability</option>
-          <option value="4">4 – Low Detectability</option>
-          <option value="5">5 – Very Low Detectability</option>
+          <option value="1">1 – Very High</option>
+          <option value="2">2 – High</option>
+          <option value="3">3 – Moderate</option>
+          <option value="4">4 – Low</option>
+          <option value="5">5 – Very Low</option>
         </select>
-        <div class="info">Higher = harder to detect.</div>
+        <div class="info">
+          <strong>Detectability = how likely defenders catch it (higher = stealthier):</strong><br>
+          • 1 (Very High): Almost certain to detect (noisy, known signatures)<br>
+          • 2 (High): Likely caught by existing controls (SIEM/IDS/IPS)<br>
+          • 3 (Moderate): Even chance; might slip by initially<br>
+          • 4 (Low): Unlikely caught timely; blends in unless hunted<br>
+          • 5 (Very Low): Essentially invisible; little‐to‐no visibility
+        </div>
       </div>
 
-      <!-- Buttons -->
+      <!-- Buttons & Output -->
       <div class="result">
         <button type="button" id="calculate-btn">Calculate Risk</button>
         <button type="button" id="reset-btn">Reset History</button>
@@ -225,6 +258,7 @@
         <thead>
           <tr>
             <th>#</th>
+            <th>Finding</th>
             <th>Impact</th>
             <th>Likelihood</th>
             <th>Detectability</th>
@@ -243,6 +277,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       // Form elements
+      const findingInput = document.getElementById('finding-name');
       const impactSelect = document.getElementById('impact');
       const likelihoodSelect = document.getElementById('likelihood');
       const detectabilitySelect = document.getElementById('detectability');
@@ -305,6 +340,7 @@
           const row = document.createElement('tr');
           row.innerHTML = `
             <td>${index + 1}</td>
+            <td>${entry.finding}</td>
             <td>${entry.impact}</td>
             <td>${entry.likelihood}</td>
             <td>${entry.detectability}</td>
@@ -317,6 +353,7 @@
 
       // Calculate Risk button handler
       calculateBtn.addEventListener('click', function () {
+        const finding = findingInput.value.trim() || '(Unnamed)';
         const impact = parseInt(impactSelect.value, 10);
         const likelihood = parseInt(likelihoodSelect.value, 10);
         const detectability = parseInt(detectabilitySelect.value, 10);
@@ -338,16 +375,18 @@
         outputDiv.appendChild(descPara);
 
         // Add to history
-        history.push({ impact, likelihood, detectability, score, tier });
+        history.push({ finding, impact, likelihood, detectability, score, tier });
         renderHistory();
       });
 
       // Reset History button handler
       resetBtn.addEventListener('click', function () {
-        history = [];
-        renderHistory();
-        outputDiv.className = 'output-box';
-        outputDiv.innerText = '';
+        if (confirm('Clear all history?')) {
+          history = [];
+          renderHistory();
+          outputDiv.className = 'output-box';
+          outputDiv.innerText = '';
+        }
       });
 
       // Export CSV
@@ -357,10 +396,12 @@
           return;
         }
 
-        // Build CSV content
-        let csvContent = 'Impact,Likelihood,Detectability,Score,Tier\r\n';
+        // Build CSV content with headers
+        let csvContent = 'Finding,Impact,Likelihood,Detectability,Score,Tier\r\n';
         history.forEach(entry => {
-          csvContent += `${entry.impact},${entry.likelihood},${entry.detectability},${entry.score},${entry.tier}\r\n`;
+          // Escape commas in finding name
+          const safeFinding = `"${entry.finding.replace(/"/g, '""')}"`;
+          csvContent += `${safeFinding},${entry.impact},${entry.likelihood},${entry.detectability},${entry.score},${entry.tier}\r\n`;
         });
 
         // Create a Blob and trigger download
@@ -375,7 +416,7 @@
         URL.revokeObjectURL(url);
       });
 
-      // Re-render history if thresholds change (tiers may shift retrospectively)
+      // Re-render history if thresholds change (so tier columns update retrospectively)
       [thresholdMediumInput, thresholdHighInput, thresholdCriticalInput].forEach(input => {
         input.addEventListener('change', renderHistory);
       });
