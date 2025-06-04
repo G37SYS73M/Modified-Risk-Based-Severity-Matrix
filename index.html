@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Modified Risk-Based Severity Calculator</title>
+  <title>Risk-Based Severity Calculator</title>
   <style>
     /* Reset and base font */
     * {
@@ -18,7 +18,7 @@
       line-height: 1.5;
     }
     .container {
-      max-width: 450px;
+      max-width: 500px;
       margin: 40px auto;
       padding: 24px;
       background-color: #fff;
@@ -44,7 +44,7 @@
       font-weight: bold;
       font-size: 1rem;
     }
-    select {
+    select, input[type="number"] {
       width: 100%;
       padding: 8px 10px;
       border: 1px solid #bbb;
@@ -56,6 +56,13 @@
       font-size: 0.9rem;
       color: #555;
       margin-top: 4px;
+    }
+    .section-title {
+      font-size: 1.2rem;
+      margin: 24px 0 12px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 6px;
+      color: #444;
     }
     .result {
       margin-top: 24px;
@@ -69,6 +76,7 @@
       border-radius: 4px;
       font-size: 1rem;
       cursor: pointer;
+      margin-right: 8px;
     }
     button:hover {
       background-color: #0056b3;
@@ -77,177 +85,299 @@
       margin-top: 16px;
       padding: 14px;
       min-height: 60px;
-      border: 1px solid #ddd;
+      border: 2px solid #ddd;
       border-radius: 4px;
       background-color: #fafafa;
       font-size: 1rem;
       text-align: left;
       white-space: pre-wrap;
+      transition: background-color 0.3s, border-color 0.3s;
     }
     .tier-label {
       font-weight: bold;
       font-size: 1.1rem;
+      display: block;
       margin-top: 8px;
     }
-    /* Color coding for tiers */
+    /* Color coding for tiers (text and background) */
     .tier-low {
-      color: #1a7f37; /* deep green */
+      color: #1a7f37;              /* deep green text */
+      background-color: #e6f7e6;   /* light green bg */
+      border-color: #1a7f37;
     }
     .tier-medium {
-      color: #a67c00; /* amber */
+      color: #a67c00;              /* amber text */
+      background-color: #fff9e6;   /* light amber bg */
+      border-color: #a67c00;
     }
     .tier-high {
-      color: #d9534f; /* orange-red */
+      color: #d9534f;              /* orange-red text */
+      background-color: #ffe6e6;   /* light red bg */
+      border-color: #d9534f;
     }
     .tier-critical {
-      color: #c10015; /* dark red */
+      color: #c10015;              /* dark red text */
+      background-color: #ffe6e6;   /* light red bg */
+      border-color: #c10015;
+    }
+    /* History table */
+    .history-container {
+      margin-top: 30px;
+      font-size: 0.95rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    .export-btn {
+      margin-top: 12px;
+      background-color: #28a745;
+    }
+    .export-btn:hover {
+      background-color: #1e7e34;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Risk-Based Severity Calculator</h1>
+
+    <!-- Settings: custom thresholds -->
+    <div class="section-title">Settings</div>
+    <form id="settings-form">
+      <div class="form-row">
+        <label for="threshold-medium">Medium Threshold (min score)</label>
+        <input type="number" id="threshold-medium" value="20" min="1" />
+      </div>
+      <div class="form-row">
+        <label for="threshold-high">High Threshold (min score)</label>
+        <input type="number" id="threshold-high" value="50" min="1" />
+      </div>
+      <div class="form-row">
+        <label for="threshold-critical">Critical Threshold (min score)</label>
+        <input type="number" id="threshold-critical" value="75" min="1" />
+      </div>
+    </form>
+
+    <!-- Calculator -->
+    <div class="section-title">Calculate Risk</div>
     <form id="risk-form">
       <!-- Impact -->
       <div class="form-row">
         <label for="impact">Impact</label>
         <select id="impact" name="impact">
-          <option value="1">1 – Negligible (no significant harm)</option>
-          <option value="2">2 – Minor (limited localized impact)</option>
-          <option value="3">3 – Moderate (subset data exposure, noticeable)</option>
-          <option value="4">4 – Major (major breach, downtime)</option>
-          <option value="5">5 – Critical (catastrophic failure, regulatory)</option>
+          <option value="1">1 – Negligible</option>
+          <option value="2">2 – Minor</option>
+          <option value="3">3 – Moderate</option>
+          <option value="4">4 – Major</option>
+          <option value="5">5 – Critical</option>
         </select>
-        <div class="info">
-          Potential damage if exploited.
-        </div>
+        <div class="info">Potential damage if exploited.</div>
       </div>
 
       <!-- Likelihood -->
       <div class="form-row">
         <label for="likelihood">Likelihood</label>
         <select id="likelihood" name="likelihood">
-          <option value="1">1 – Rare (extremely unlikely)</option>
-          <option value="2">2 – Unlikely (possible but not expected)</option>
-          <option value="3">3 – Possible (feasible with moderate effort)</option>
-          <option value="4">4 – Likely (straightforward, observed in wild)</option>
-          <option value="5">5 – Certain (trivial or actively exploited)</option>
+          <option value="1">1 – Rare</option>
+          <option value="2">2 – Unlikely</option>
+          <option value="3">3 – Possible</option>
+          <option value="4">4 – Likely</option>
+          <option value="5">5 – Certain</option>
         </select>
-        <div class="info">
-          Probability the issue can be exploited.
-        </div>
+        <div class="info">Probability the issue can be exploited.</div>
       </div>
 
       <!-- Detectability -->
       <div class="form-row">
         <label for="detectability">Detectability</label>
         <select id="detectability" name="detectability">
-          <option value="1">1 – Very High (nearly certain to detect)</option>
-          <option value="2">2 – High (likely caught by controls)</option>
-          <option value="3">3 – Moderate (50/50 detection chance)</option>
-          <option value="4">4 – Low (unlikely to be caught timely)</option>
-          <option value="5">5 – Very Low (stealthy, almost invisible)</option>
+          <option value="1">1 – Very High Detectability</option>
+          <option value="2">2 – High Detectability</option>
+          <option value="3">3 – Moderate Detectability</option>
+          <option value="4">4 – Low Detectability</option>
+          <option value="5">5 – Very Low Detectability</option>
         </select>
-        <div class="info">
-          How easily the attack is detected (higher = harder to detect).
-        </div>
+        <div class="info">Higher = harder to detect.</div>
       </div>
 
-      <!-- Calculate button and output -->
+      <!-- Buttons -->
       <div class="result">
         <button type="button" id="calculate-btn">Calculate Risk</button>
+        <button type="button" id="reset-btn">Reset History</button>
         <div id="output" class="output-box"></div>
       </div>
     </form>
+
+    <!-- History & Export -->
+    <div class="history-container">
+      <div class="section-title">Calculation History</div>
+      <table id="history-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Impact</th>
+            <th>Likelihood</th>
+            <th>Detectability</th>
+            <th>Score</th>
+            <th>Tier</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Rows will be inserted here -->
+        </tbody>
+      </table>
+      <button type="button" class="export-btn" id="export-btn">Export as CSV</button>
+    </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      // Form elements
       const impactSelect = document.getElementById('impact');
       const likelihoodSelect = document.getElementById('likelihood');
       const detectabilitySelect = document.getElementById('detectability');
       const calculateBtn = document.getElementById('calculate-btn');
+      const resetBtn = document.getElementById('reset-btn');
       const outputDiv = document.getElementById('output');
 
-      // Tier definitions and recommended actions
-      const tiers = [
-        {
-          name: 'Low',
-          min: 0,
-          max: 19,
-          description: 
-            'Low risk – low impact and/or easily detected.\n' +
-            'Recommended Action: Accept or defer. Fix during routine maintenance; track for reevaluation.'
-        },
-        {
-          name: 'Medium',
-          min: 20,
-          max: 49,
-          description: 
-            'Moderate risk – either high impact but high detectability, or lower impact with low detectability.\n' +
-            'Recommended Action: Scheduled remediation. Fix within 30–60 days; apply compensating controls temporarily.'
-        },
-        {
-          name: 'High',
-          min: 50,
-          max: 74,
-          description:
-            'High risk – serious impact and/or low detectability. Limited early warning.\n' +
-            'Recommended Action: Prompt remediation. Fix within next patch cycle (e.g., 7 days). Apply temporary controls if needed.'
-        },
-        {
-          name: 'Critical',
-          min: 75,
-          max: Infinity,
-          description:
-            'Critical risk – extreme impact and very low detectability (stealthy).\n' +
-            'Recommended Action: Immediate mitigation. Incident response or emergency patching within 24–48 hours, inform senior management.'
-        }
-      ];
+      // Threshold inputs
+      const thresholdMediumInput = document.getElementById('threshold-medium');
+      const thresholdHighInput = document.getElementById('threshold-high');
+      const thresholdCriticalInput = document.getElementById('threshold-critical');
 
-      // Determine severity tier based on score
+      // History table
+      const historyTableBody = document.querySelector('#history-table tbody');
+      const exportBtn = document.getElementById('export-btn');
+
+      // In-memory history array
+      let history = [];
+
+      // Determine tier based on custom thresholds
       function getTier(score) {
-        return tiers.find(t => score >= t.min && score <= t.max);
+        const tMedium = parseInt(thresholdMediumInput.value, 10);
+        const tHigh = parseInt(thresholdHighInput.value, 10);
+        const tCritical = parseInt(thresholdCriticalInput.value, 10);
+
+        if (score >= tCritical) {
+          return 'Critical';
+        } else if (score >= tHigh) {
+          return 'High';
+        } else if (score >= tMedium) {
+          return 'Medium';
+        } else {
+          return 'Low';
+        }
       }
 
+      // Map tier to CSS class
+      function tierClass(tier) {
+        switch (tier) {
+          case 'Low': return 'tier-low';
+          case 'Medium': return 'tier-medium';
+          case 'High': return 'tier-high';
+          case 'Critical': return 'tier-critical';
+          default: return '';
+        }
+      }
+
+      // Tier descriptions
+      const tierDescriptions = {
+        Low: 'Low risk – low impact and/or easily detected.\nAccept or defer; fix during routine maintenance.',
+        Medium: 'Moderate risk – moderate impact or moderate detectability.\nSchedule remediation within 30–60 days; apply compensating controls.',
+        High: 'High risk – serious impact and/or low detectability.\nRemediate within next patch cycle (7 days); monitor closely.',
+        Critical: 'Critical risk – extreme impact and stealthy (hard to detect).\nImmediate mitigation within 24–48 hours; inform senior management.'
+      };
+
+      // Render history table
+      function renderHistory() {
+        historyTableBody.innerHTML = '';
+        history.forEach((entry, index) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${entry.impact}</td>
+            <td>${entry.likelihood}</td>
+            <td>${entry.detectability}</td>
+            <td>${entry.score}</td>
+            <td>${entry.tier}</td>
+          `;
+          historyTableBody.appendChild(row);
+        });
+      }
+
+      // Calculate Risk button handler
       calculateBtn.addEventListener('click', function () {
-        // Parse selected values
         const impact = parseInt(impactSelect.value, 10);
         const likelihood = parseInt(likelihoodSelect.value, 10);
         const detectability = parseInt(detectabilitySelect.value, 10);
 
-        // Compute composite score
         const score = impact * likelihood * detectability;
+        const tier = getTier(score);
+        const tClass = tierClass(tier);
 
-        // Lookup tier
-        const tierObj = getTier(score);
+        // Update output styling and content
+        outputDiv.className = `output-box ${tClass}`;
+        outputDiv.innerText = `Composite Risk Score: ${score}\n`;
+        const tierLabel = document.createElement('span');
+        tierLabel.className = `tier-label ${tClass}`;
+        tierLabel.innerText = `Severity Tier: ${tier}`;
+        outputDiv.appendChild(tierLabel);
+        const descPara = document.createElement('pre');
+        descPara.style.marginTop = '8px';
+        descPara.innerText = tierDescriptions[tier];
+        outputDiv.appendChild(descPara);
 
-        // Determine CSS class for color
-        let tierClass = '';
-        switch (tierObj.name) {
-          case 'Low':
-            tierClass = 'tier-low';
-            break;
-          case 'Medium':
-            tierClass = 'tier-medium';
-            break;
-          case 'High':
-            tierClass = 'tier-high';
-            break;
-          case 'Critical':
-            tierClass = 'tier-critical';
-            break;
+        // Add to history
+        history.push({ impact, likelihood, detectability, score, tier });
+        renderHistory();
+      });
+
+      // Reset History button handler
+      resetBtn.addEventListener('click', function () {
+        history = [];
+        renderHistory();
+        outputDiv.className = 'output-box';
+        outputDiv.innerText = '';
+      });
+
+      // Export CSV
+      exportBtn.addEventListener('click', function () {
+        if (history.length === 0) {
+          alert('No history to export.');
+          return;
         }
 
-        // Display results
-        outputDiv.innerHTML = `
-<strong>Composite Risk Score:</strong> ${score}
+        // Build CSV content
+        let csvContent = 'Impact,Likelihood,Detectability,Score,Tier\r\n';
+        history.forEach(entry => {
+          csvContent += `${entry.impact},${entry.likelihood},${entry.detectability},${entry.score},${entry.tier}\r\n`;
+        });
 
-<strong class="tier-label ${tierClass}">Severity Tier: ${tierObj.name}</strong>
+        // Create a Blob and trigger download
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'risk_history.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
 
-${tierObj.description}
-        `;
-        outputDiv.scrollIntoView({ behavior: 'smooth' });
+      // Re-render history if thresholds change (tiers may shift retrospectively)
+      [thresholdMediumInput, thresholdHighInput, thresholdCriticalInput].forEach(input => {
+        input.addEventListener('change', renderHistory);
       });
     });
   </script>
