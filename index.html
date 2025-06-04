@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Modified Risk Based Severity Calculator</title>
+  <title>Modified Risk-Based Severity Calculator</title>
   <style>
-    /* Basic reset & font */
+    /* Reset and base font */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -13,54 +13,57 @@
     }
     body {
       font-family: Arial, sans-serif;
-      background-color: #f7f7f7;
+      background-color: #f4f6f8;
       color: #333;
       line-height: 1.5;
     }
     .container {
-      max-width: 400px;
+      max-width: 450px;
       margin: 40px auto;
-      padding: 20px 24px;
+      padding: 24px;
       background-color: #fff;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     h1 {
       text-align: center;
-      margin-bottom: 24px;
-      font-size: 1.6rem;
+      margin-bottom: 20px;
+      font-size: 1.75rem;
       color: #222;
     }
-
-    /* Form layout */
     form {
       display: flex;
       flex-direction: column;
     }
     .form-row {
-      margin-bottom: 16px;
-      display: flex;
-      flex-direction: column;
+      margin-bottom: 18px;
     }
     label {
+      display: block;
       margin-bottom: 6px;
       font-weight: bold;
-    }
-    select {
-      padding: 8px 10px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
       font-size: 1rem;
     }
-
-    /* Button & output */
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #bbb;
+      border-radius: 4px;
+      font-size: 1rem;
+      background-color: #fafafa;
+    }
+    .info {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 4px;
+    }
     .result {
       margin-top: 24px;
       text-align: center;
     }
     button {
-      padding: 10px 20px;
-      background-color: #1e90ff;
+      padding: 10px 24px;
+      background-color: #007bff;
       color: #fff;
       border: none;
       border-radius: 4px;
@@ -68,68 +71,97 @@
       cursor: pointer;
     }
     button:hover {
-      background-color: #0d74d1;
+      background-color: #0056b3;
     }
     .output-box {
       margin-top: 16px;
-      padding: 12px;
-      min-height: 48px;
+      padding: 14px;
+      min-height: 60px;
       border: 1px solid #ddd;
       border-radius: 4px;
       background-color: #fafafa;
+      font-size: 1rem;
+      text-align: left;
+      white-space: pre-wrap;
+    }
+    .tier-label {
+      font-weight: bold;
       font-size: 1.1rem;
+      margin-top: 8px;
+    }
+    /* Color coding for tiers */
+    .tier-low {
+      color: #1a7f37; /* deep green */
+    }
+    .tier-medium {
+      color: #a67c00; /* amber */
+    }
+    .tier-high {
+      color: #d9534f; /* orange-red */
+    }
+    .tier-critical {
+      color: #c10015; /* dark red */
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Risk Rating Calculator</h1>
-
+    <h1>Risk-Based Severity Calculator</h1>
     <form id="risk-form">
+      <!-- Impact -->
       <div class="form-row">
-        <label for="impact">Impact:</label>
+        <label for="impact">Impact</label>
         <select id="impact" name="impact">
-          <option value="1">1 – Negligible</option>
-          <option value="2">2 – Minor</option>
-          <option value="3">3 – Moderate</option>
-          <option value="4">4 – Major</option>
-          <option value="5">5 – Critical</option>
+          <option value="1">1 – Negligible (no significant harm)</option>
+          <option value="2">2 – Minor (limited localized impact)</option>
+          <option value="3">3 – Moderate (subset data exposure, noticeable)</option>
+          <option value="4">4 – Major (major breach, downtime)</option>
+          <option value="5">5 – Critical (catastrophic failure, regulatory)</option>
         </select>
+        <div class="info">
+          Potential damage if exploited.
+        </div>
       </div>
 
+      <!-- Likelihood -->
       <div class="form-row">
-        <label for="likelihood">Likelihood:</label>
+        <label for="likelihood">Likelihood</label>
         <select id="likelihood" name="likelihood">
-          <option value="1">1 – Rare</option>
-          <option value="2">2 – Unlikely</option>
-          <option value="3">3 – Possible</option>
-          <option value="4">4 – Likely</option>
-          <option value="5">5 – Certain</option>
+          <option value="1">1 – Rare (extremely unlikely)</option>
+          <option value="2">2 – Unlikely (possible but not expected)</option>
+          <option value="3">3 – Possible (feasible with moderate effort)</option>
+          <option value="4">4 – Likely (straightforward, observed in wild)</option>
+          <option value="5">5 – Certain (trivial or actively exploited)</option>
         </select>
+        <div class="info">
+          Probability the issue can be exploited.
+        </div>
       </div>
 
+      <!-- Detectability -->
       <div class="form-row">
-        <label for="detectability">Detectability:</label>
+        <label for="detectability">Detectability</label>
         <select id="detectability" name="detectability">
-          <option value="1">1 – Very High Detectability</option>
-          <option value="2">2 – High Detectability</option>
-          <option value="3">3 – Moderate Detectability</option>
-          <option value="4">4 – Low Detectability</option>
-          <option value="5">5 – Very Low Detectability</option>
+          <option value="1">1 – Very High (nearly certain to detect)</option>
+          <option value="2">2 – High (likely caught by controls)</option>
+          <option value="3">3 – Moderate (50/50 detection chance)</option>
+          <option value="4">4 – Low (unlikely to be caught timely)</option>
+          <option value="5">5 – Very Low (stealthy, almost invisible)</option>
         </select>
+        <div class="info">
+          How easily the attack is detected (higher = harder to detect).
+        </div>
       </div>
 
+      <!-- Calculate button and output -->
       <div class="result">
         <button type="button" id="calculate-btn">Calculate Risk</button>
-        <div id="output" class="output-box">
-          <!-- Numeric score + tier will appear here -->
-        </div>
+        <div id="output" class="output-box"></div>
       </div>
     </form>
   </div>
 
   <script>
-    // Wait until DOM is fully loaded
     document.addEventListener('DOMContentLoaded', function () {
       const impactSelect = document.getElementById('impact');
       const likelihoodSelect = document.getElementById('likelihood');
@@ -137,37 +169,85 @@
       const calculateBtn = document.getElementById('calculate-btn');
       const outputDiv = document.getElementById('output');
 
-      // Map the numeric score to a qualitative tier
-      function getSeverityTier(score) {
-        if (score >= 75) {
-          return 'Critical';
-        } else if (score >= 50) {
-          return 'High';
-        } else if (score >= 20) {
-          return 'Medium';
-        } else {
-          return 'Low';
+      // Tier definitions and recommended actions
+      const tiers = [
+        {
+          name: 'Low',
+          min: 0,
+          max: 19,
+          description: 
+            'Low risk – low impact and/or easily detected.\n' +
+            'Recommended Action: Accept or defer. Fix during routine maintenance; track for reevaluation.'
+        },
+        {
+          name: 'Medium',
+          min: 20,
+          max: 49,
+          description: 
+            'Moderate risk – either high impact but high detectability, or lower impact with low detectability.\n' +
+            'Recommended Action: Scheduled remediation. Fix within 30–60 days; apply compensating controls temporarily.'
+        },
+        {
+          name: 'High',
+          min: 50,
+          max: 74,
+          description:
+            'High risk – serious impact and/or low detectability. Limited early warning.\n' +
+            'Recommended Action: Prompt remediation. Fix within next patch cycle (e.g., 7 days). Apply temporary controls if needed.'
+        },
+        {
+          name: 'Critical',
+          min: 75,
+          max: Infinity,
+          description:
+            'Critical risk – extreme impact and very low detectability (stealthy).\n' +
+            'Recommended Action: Immediate mitigation. Incident response or emergency patching within 24–48 hours, inform senior management.'
         }
+      ];
+
+      // Determine severity tier based on score
+      function getTier(score) {
+        return tiers.find(t => score >= t.min && score <= t.max);
       }
 
-      // When user clicks “Calculate Risk”
       calculateBtn.addEventListener('click', function () {
-        // Parse selected values as integers
+        // Parse selected values
         const impact = parseInt(impactSelect.value, 10);
         const likelihood = parseInt(likelihoodSelect.value, 10);
         const detectability = parseInt(detectabilitySelect.value, 10);
 
-        // Calculate composite score
+        // Compute composite score
         const score = impact * likelihood * detectability;
 
-        // Determine severity tier
-        const tier = getSeverityTier(score);
+        // Lookup tier
+        const tierObj = getTier(score);
 
-        // Display result
+        // Determine CSS class for color
+        let tierClass = '';
+        switch (tierObj.name) {
+          case 'Low':
+            tierClass = 'tier-low';
+            break;
+          case 'Medium':
+            tierClass = 'tier-medium';
+            break;
+          case 'High':
+            tierClass = 'tier-high';
+            break;
+          case 'Critical':
+            tierClass = 'tier-critical';
+            break;
+        }
+
+        // Display results
         outputDiv.innerHTML = `
-          <strong>Risk Score:</strong> ${score} <br/>
-          <strong>Severity Tier:</strong> ${tier}
+<strong>Composite Risk Score:</strong> ${score}
+
+<strong class="tier-label ${tierClass}">Severity Tier: ${tierObj.name}</strong>
+
+${tierObj.description}
         `;
+        outputDiv.scrollIntoView({ behavior: 'smooth' });
       });
     });
   </script>
